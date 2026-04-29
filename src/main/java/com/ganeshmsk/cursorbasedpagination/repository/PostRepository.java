@@ -12,16 +12,19 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     @Query("""
     SELECT p FROM Post p
+    ORDER BY p.createdAt DESC, p.id DESC
+""")
+    List<Post> findFirstPage(Pageable pageable);
+
+    @Query("""
+    SELECT p FROM Post p
     WHERE (
-        :createdAt IS NULL OR
-        (
-            p.createdAt < :createdAt OR
-            (p.createdAt = :createdAt AND (:id IS NULL OR p.id < :id))
-        )
+        p.createdAt < :createdAt OR
+        (p.createdAt = :createdAt AND p.id < :id)
     )
     ORDER BY p.createdAt DESC, p.id DESC
 """)
-    List<Post> findPosts(
+    List<Post> findPostsWithCursor(
             @Param("createdAt") LocalDateTime createdAt,
             @Param("id") Long id,
             Pageable pageable
